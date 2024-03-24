@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="static/css/style.css">
+  <h1 style="text-align: center">Works Log</h1>
+  {% for work in works['works'] %}
+    <h1>Action #{{ work['id'] }}</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>Title of activity</th>
+          <th>Team leader</th>
+          <th>Duration</th>
+          <th>List of collaborators</th>
+          <th>Is finished</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>{{ work['job'] }}</th>
+          <th>{{ work['leader'] }}</th>
+          <th>{{ work['duration'] }}</th>
+          <th>{{ work['collaborators'] }}</th>
+          <td>
+            {% if work['is_finished'] %}
+              is finished
+            {% else %}
+              is not finished
+            {% endif %}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  {% endfor %}
+  <a class="btn btn-dark" href="/add_work" style="margin-top: 10px">Добавить работу</a>
+{% endblock %}
