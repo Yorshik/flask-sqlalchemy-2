@@ -204,7 +204,8 @@ def index():
         'leader': team_leaders[work.team_leader],
         'job': work
     } for work in works]
-    return render_template('magazine.html', works={'works': updated_works})
+    return render_template('magazine.html', works={'works': updated_works},
+                           captain=db_sess.query(User).filter(User.id == 1).first())
 
 
 if __name__ == '__main__':

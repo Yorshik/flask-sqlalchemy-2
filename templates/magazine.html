@@ -33,7 +33,7 @@
         </tr>
       </tbody>
     </table>
-    {% if current_user.is_authenticated and (current_user == work['job'].user) %}
+    {% if current_user.is_authenticated and (current_user == work['job'].user or current_user == captain) %}
     <div>
         <a href="/work/{{ work['job'].id }}" class="btn btn-warning">
             Изменить
