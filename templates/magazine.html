@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <link rel="stylesheet" href="static/css/style.css">
   <h1 style="text-align: center">Works Log</h1>
-  <a class="btn btn-dark" href="/add_work" style="margin-top: 10px">Добавить работу</a>
+  <a class="btn btn-dark" href="/departments" style="margin-top: 10px">To departments</a>
+  <a class="btn btn-dark" href="/add_work" style="margin-top: 10px">Add job</a>
   {% for work in works['works'] %}
     <h1>Action #{{ work['job'].id }}</h1>
     <table>
@@ -36,10 +37,10 @@
     {% if current_user.is_authenticated and (current_user == work['job'].user or current_user == captain) %}
     <div>
         <a href="/work/{{ work['job'].id }}" class="btn btn-warning">
-            Изменить
+            Edit
         </a>
         <a href="/work_delete/{{ work['job'].id }}" class="btn btn-danger">
-            Удалить
+            Delete
         </a>
     </div>
     {% endif %}

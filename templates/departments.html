@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <link rel="stylesheet" href="static/css/style.css">
+    <a class="btn btn-dark" href="/">Back to jobs</a>
+    <a class="btn btn-dark" href="/add_department">Add a department</a>
+    <h1>List of departments</h1>
+    {% for department in departments %}
+        <h1>Department #{{ loop.index }}</h1>
+        <table>
+            <thead>
+              <tr>
+                  <th>Title of department</th>
+                  <th>Chief</th>
+                  <th>Members</th>
+                  <th>Department Email</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                  <th>{{ department.title }}</th>
+                  <th>{{ department.chief }}</th>
+                  <th>{{ department.members }}</th>
+                  <th>{{ department.email }}</th>
+              </tr>
+            </tbody>
+        </table>
+        {% if current_user.is_authenticated and (current_user == department.user or current_user == captain) %}
+        <div>
+            <a href="/department/{{ department.id }}" class="btn btn-warning">
+                Edit
+            </a>
+            <a href="/department_delete/{{ department.id }}" class="btn btn-danger">
+                Delete
+            </a>
+        </div>
+        {% endif %}
+    {% endfor %}
+{% endblock%}
