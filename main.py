@@ -1,7 +1,8 @@
 import datetime
 
-from flask import Flask, redirect, render_template
-from flask_login import LoginManager, login_user, logout_user
+import sqlalchemy.orm
+from flask import Flask, redirect, render_template, abort, request
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_wtf import FlaskForm
 from wtforms import SubmitField, EmailField, PasswordField, BooleanField, StringField, IntegerField, DateField
 from wtforms.validators import DataRequired, EqualTo
@@ -56,9 +57,75 @@ class WorkForm(FlaskForm):
 
 
 @app.route('/logout')
+@login_required
 def logout():
     logout_user()
     return redirect('/')
+
+
+@app.route('/work_delete/<int:num>', methods=['GET', 'POST'])
+def work_delete(num):
+    db_sess = create_session()
+    job = db_sess.query(Jobs).filter(
+        Jobs.id == num,
+        Jobs.user == current_user
+        ).first()
+    if job:
+        db_sess.delete(job)
+        db_sess.commit()
+    else:
+        abort(404)
+    return redirect('/')
+
+
+@app.route('/work/<int:num>', methods=["GET", "POST"])
+def work(num):
+    form = WorkForm()
+    if request.method == "GET":
+        db_sess = create_session()
+        jobs = db_sess.query(Jobs).filter(
+            Jobs.id == num
+            ).first()
+        if jobs.user != current_user and load_user(1) != current_user:
+            db_sess.close()
+            abort(401)
+        db_sess.close()
+        if jobs:
+            form.start_date.data = jobs.start_date
+            form.end_date.data = jobs.end_date
+            form.teamleader.data = jobs.team_leader
+            form.collaborators.data = jobs.collaborators
+            form.work_size.data = jobs.work_size
+            form.is_finished.data = jobs.is_finished
+            form.job.data = jobs.job
+            form.submit.label.text = 'Изменить'
+        else:
+            abort(404)
+    if form.validate_on_submit():
+        db_sess = create_session()
+        jobs = db_sess.query(Jobs).filter(
+            Jobs.id == num,
+            Jobs.user == current_user
+            ).first()
+        if jobs:
+            jobs.start_date = form.start_date.data
+            jobs.end_date = form.end_date.data
+            jobs.team_leader = form.teamleader.data
+            jobs.collaborators = form.collaborators.data
+            jobs.work_size = form.work_size.data
+            jobs.is_finished = form.is_finished.data
+            jobs.job = form.job.data
+            db_sess.commit()
+            db_sess.close()
+            return redirect('/')
+        else:
+            db_sess.close()
+            abort(404)
+    return render_template(
+        'work.html',
+        title='Редактирование работы',
+        form=form
+        )
 
 
 @app.route('/add_work', methods=['GET', 'POST'])
@@ -134,11 +201,9 @@ def index():
             if worker.team_leader == user.id:
                 team_leaders[worker.team_leader] = user.surname + ' ' + user.name
     updated_works = [{
-        'id': work.id, 'job': work.job, 'leader': team_leaders[work.team_leader],
-        'duration': work.end_date - work.start_date, 'collaborators': work.collaborators,
-        'is_finished': work.is_finished
+        'leader': team_leaders[work.team_leader],
+        'job': work
     } for work in works]
-    db_sess.close()
     return render_template('magazine.html', works={'works': updated_works})
 
 
