@@ -2,7 +2,7 @@ import datetime
 from flask_login import UserMixin
 import sqlalchemy
 from werkzeug.security import check_password_hash, generate_password_hash
-from .db_session import SqlAlchemyBase
+from data.db_session import SqlAlchemyBase
 
 
 class User(SqlAlchemyBase, UserMixin):

@@ -10,6 +10,7 @@ from data.db_session import create_session, global_init
 from data.departments import Department
 from data.jobs import Jobs
 from data.users import User
+from data.categories import Category, association_table
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
@@ -204,19 +205,14 @@ def login():
 @app.route('/')
 def index():
     db_sess = create_session()
-    works = db_sess.query(Jobs).all()
-    users = db_sess.query(User).all()
-    team_leaders = {}
-    for worker in works:
-        for user in users:
-            if worker.team_leader == user.id:
-                team_leaders[worker.team_leader] = user.surname + ' ' + user.name
-    updated_works = [{
-        'leader': team_leaders[work.team_leader],
-        'job': work
-    } for work in works]
-    return render_template('magazine.html', works={'works': updated_works},
-                           captain=db_sess.query(User).filter(User.id == 1).first())
+    jobs_data = db_sess.query(Jobs).all()
+    data = []
+    association_table_data = db_sess.query(association_table).all()
+    for jobs_id, category_id in association_table_data:
+        job = db_sess.query(Jobs).filter(Jobs.id == jobs_id).first()
+        category = db_sess.query(Category).filter(Category.id == category_id).first()
+        data.append((job, category))
+    return render_template('magazine.html', jobs_data=jobs_data, print_data=data)
 
 
 @app.route('/departments')
